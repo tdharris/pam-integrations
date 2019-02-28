@@ -7,13 +7,13 @@ services:
     container_name: '${LDAP_CONTAINER_NAME}'
     image: osixia/openldap:${LDAP_OPENLDAP_VERSION}
     command: --loglevel debug
-    user: '${LDAP_OPENLDAP_UID}:${LDAP_OPENLDAP_GID}'
+    user: '${RUN_UID}:${RUN_GID}'
     ports:
       - '${LDAP_PORT_UNSECURE}:389'
       - '${LDAP_PORT_SECURE}:636'
     environment:
-      - LDAP_OPENLDAP_GID=${LDAP_OPENLDAP_UID}
-      - LDAP_OPENLDAP_UID=${LDAP_OPENLDAP_GID}
+      - LDAP_OPENLDAP_GID=${RUN_UID}
+      - LDAP_OPENLDAP_UID=${RUN_GID}
       - LDAP_ORGANISATION=${LDAP_ORGANISATION}
       - LDAP_DOMAIN=${LDAP_DOMAIN}
       - LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD}
@@ -26,16 +26,16 @@ services:
       - ./data/${LDAP_CONTAINER_NAME}/config:/etc/ldap/slapd.d
       - ./data/${LDAP_CONTAINER_NAME}/certificates:/container/service/slapd/assets/certs
 
-    # oracle:
-      # https://github.com/oracle/docker-images/blob/master/OracleDatabase/SingleInstance/README.md
-      # container_name: '${ORACLE_CONTAINER_NAME}'
-      # image: oracle/database:18.3.0-ee
+  # oracle:
+  #   https://github.com/oracle/docker-images/blob/master/OracleDatabase/SingleInstance/README.md
+  #   container_name: '${ORACLE_CONTAINER_NAME}'
+  #   image: oracle/database:18.3.0-ee
 
   mysql:
     # https://hub.docker.com/_/mysql
     container_name: '${MYSQL_CONTAINER_NAME}'
     image: mysql:${MYSQL_VERSION}
-    user: '${LDAP_OPENLDAP_UID}:${LDAP_OPENLDAP_GID}'
+    user: '${RUN_UID}:${RUN_GID}'
     ports:
       - '${MYSQL_PROTOCOL_MYSQL_PORT}:3306'
       - '${MYSQL_PROTOCOL_MYSQLX_PORT}:33060'
@@ -47,6 +47,35 @@ services:
     volumes:
       - ./data/${MYSQL_CONTAINER_NAME}/data:/var/lib/mysql
 
+  mariadb:
+    # https://hub.docker.com/_/mariadb
+    container_name: '${MARIADB_CONTAINER_NAME}'
+    image: mariadb:${MARIADB_VERSION}
+    user: '${RUN_UID}:${RUN_GID}'
+    ports:
+      - '${MARIADB_PROTOCOL_MYSQL_PORT}:3306'
+      - '${MARIADB_PROTOCOL_MYSQLX_PORT}:33060'
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MARIADB_DATABASE}
+      - MYSQL_USER=${MARIADB_USER}
+      - MYSQL_PASSWORD=${MARIADB_PASSWORD}
+    volumes:
+      - ./data/${MARIADB_CONTAINER_NAME}/data:/var/lib/mysql
+
+  postgres:
+    # https://hub.docker.com/_/postgres
+    container_name: '${POSTGRES_CONTAINER_NAME}'
+    image: postgres:${POSTGRES_VERSION}
+    user: '${RUN_UID}:${RUN_GID}'
+    ports:
+      - '${POSTGRES_PORT}:5432'
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - ./data/${POSTGRES_CONTAINER_NAME}/data:/var/lib/postgresql/data
 
     # Databases:
     # Oracle
