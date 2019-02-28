@@ -5,7 +5,7 @@ services:
   openldap:
     # https://github.com/osixia/docker-openldap
     container_name: '${LDAP_CONTAINER_NAME}'
-    image: osixia/openldap:latest
+    image: osixia/openldap:${LDAP_OPENLDAP_VERSION}
     command: --loglevel debug
     user: '${LDAP_OPENLDAP_UID}:${LDAP_OPENLDAP_GID}'
     ports:
@@ -30,6 +30,22 @@ services:
       # https://github.com/oracle/docker-images/blob/master/OracleDatabase/SingleInstance/README.md
       # container_name: '${ORACLE_CONTAINER_NAME}'
       # image: oracle/database:18.3.0-ee
+
+  mysql:
+    # https://hub.docker.com/_/mysql
+    container_name: '${MYSQL_CONTAINER_NAME}'
+    image: mysql:${MYSQL_VERSION}
+    user: '${LDAP_OPENLDAP_UID}:${LDAP_OPENLDAP_GID}'
+    ports:
+      - '${MYSQL_PROTOCOL_MYSQL_PORT}:3306'
+      - '${MYSQL_PROTOCOL_MYSQLX_PORT}:33060'
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - ./data/${MYSQL_CONTAINER_NAME}/data:/var/lib/mysql
 
 
     # Databases:
