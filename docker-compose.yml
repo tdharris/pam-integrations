@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+
+  openldap:
+    # https://github.com/osixia/docker-openldap
+    container_name: '${LDAP_CONTAINER_NAME}'
+    image: osixia/openldap:latest
+    command: --loglevel debug
+    user: '${LDAP_OPENLDAP_UID}:${LDAP_OPENLDAP_GID}'
+    ports:
+      - '${LDAP_PORT_UNSECURE}:389'
+      - '${LDAP_PORT_SECURE}:636'
+    environment:
+      - LDAP_OPENLDAP_GID=${LDAP_OPENLDAP_UID}
+      - LDAP_OPENLDAP_UID=${LDAP_OPENLDAP_GID}
+      - LDAP_ORGANISATION=${LDAP_ORGANISATION}
+      - LDAP_DOMAIN=${LDAP_DOMAIN}
+      - LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD}
+      - LDAP_CONFIG_PASSWORD=${LDAP_CONFIG_PASSWORD}
+      - LDAP_READONLY_USER=${LDAP_READONLY_USER}
+      - LDAP_READONLY_USER_USERNAME=${LDAP_READONLY_USER_USERNAME}
+      - LDAP_READONLY_USER_PASSWORD=${LDAP_READONLY_USER_PASSWORD}
+    volumes:
+      - ./data/${LDAP_CONTAINER_NAME}/data:/var/lib/ldap
+      - ./data/${LDAP_CONTAINER_NAME}/config:/etc/ldap/slapd.d
+      - ./data/${LDAP_CONTAINER_NAME}/certificates:/container/service/slapd/assets/certs
+
+    # oracle:
+      # https://github.com/oracle/docker-images/blob/master/OracleDatabase/SingleInstance/README.md
+      # container_name: '${ORACLE_CONTAINER_NAME}'
+      # image: oracle/database:18.3.0-ee
+
+
+    # Databases:
+    # Oracle
+    # Microsoft SQL Server
+    # MySQL
+    # MariaDB
+    # Sybase
+    # PostgreSQL
+
+    # Services:
+    # OpenStack
+    # Amazon Web Services (AWS)
+    # System Applications Product (SAP) 7.x
