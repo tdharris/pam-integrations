@@ -45,6 +45,7 @@ services:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
+      - ./init/mysql:/docker-entrypoint-initdb.d
       - ./data/${MYSQL_CONTAINER_NAME}/data:/var/lib/mysql
 
   mariadb:
@@ -75,6 +76,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
+      - ./init/postgres:/docker-entrypoint-initdb.d
       - ./data/${POSTGRES_CONTAINER_NAME}/data:/var/lib/postgresql/data
 
     # Databases:
