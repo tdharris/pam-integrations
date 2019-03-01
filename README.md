@@ -4,6 +4,7 @@
 ### Pre-requisites
 - docker
 - docker-compose
+- `.env` file
 
 ### Start & Initialize
 ```
@@ -12,7 +13,7 @@ docker-compose up [-d]
 
 ### Manage docker containers
 ```
-docker ps [<container>]
+docker ps <container>
 docker start <container>
 docker stop <container>
 docker logs -f --tail 10 <container>
@@ -27,7 +28,11 @@ Mapped to local volumes respective to each container. If applicable:
 ## Initialization scripts
 Any executable `*.sql`, `*.sql.gz`, `*.sh` scripts contained in appropriate `./init/{dbtype}/` folders will be ran to do further initialization before starting the respective service.
 
+### Default init
+3 users are created and given all privileges to the appropriate initialized db (i.e. `example`): `dbuser{1-3}`. According to the default `Environment Variables`, the default admin user created is `dbadmin`.
+
 ## Environment Variables
+Example environment variables can be seen below. A `.env` file should be created in the root directory setting the appropriate variables needed to initialize these containers.
 ```
 # Run containers as user
 RUN_UID=0
