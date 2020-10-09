@@ -26,11 +26,6 @@ services:
       - ./data/${LDAP_CONTAINER_NAME}/config:/etc/ldap/slapd.d
       - ./data/${LDAP_CONTAINER_NAME}/certificates:/container/service/slapd/assets/certs
 
-  # oracle:
-  #   https://github.com/oracle/docker-images/blob/master/OracleDatabase/SingleInstance/README.md
-  #   container_name: '${ORACLE_CONTAINER_NAME}'
-  #   image: oracle/database:18.3.0-ee
-
   mysql:
     # https://hub.docker.com/_/mysql
     container_name: '${MYSQL_CONTAINER_NAME}'
@@ -62,6 +57,7 @@ services:
       - MYSQL_USER=${MARIADB_USER}
       - MYSQL_PASSWORD=${MARIADB_PASSWORD}
     volumes:
+      - ./init/mariadb:/docker-entrypoint-initdb.d
       - ./data/${MARIADB_CONTAINER_NAME}/data:/var/lib/mysql
 
   postgres:
@@ -79,32 +75,50 @@ services:
       - ./init/postgres:/docker-entrypoint-initdb.d
       - ./data/${POSTGRES_CONTAINER_NAME}/data:/var/lib/postgresql/data
 
-  # mssql:
-  #   # https://hub.docker.com/_/microsoft-mssql-server
-  #   container_name: '${MSSQL_CONTAINER_NAME}'
-  #   image: 'mcr.microsoft.com/mssql/server:${MSSQL_VERSION}'
-  #   user: '${RUN_UID}:${RUN_GID}'
-  #   init: /docker-entrypoint-initdb.d/setup.sh
-  #   ports:
-  #     - '${MSSQL_TCP_PORT}:1234'
-  #   environment:
-  #     - ACCEPT_EULA=Y
-  #     - MSSQL_TCP_PORT=${MSSQL_TCP_PORT}
-  #     - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
-  #     - MSSQL_PID=${MSSQL_PID}
-  #   volumes:
-  #     - ./init/${MSSQL_CONTAINER_NAME}:/docker-entrypoint-initdb.d
-  #     - ./data/${MSSQL_CONTAINER_NAME}/data:/
+  mssql:
+    # https://hub.docker.com/_/microsoft-mssql-server
+    container_name: '${MSSQL_CONTAINER_NAME}'
+    image: 'mcr.microsoft.com/mssql/server:${MSSQL_VERSION}'
+    user: '${RUN_UID}:${RUN_GID}'
+    # init: /docker-entrypoint-initdb.d/setup.sh
+    ports:
+      - '${MSSQL_TCP_PORT}:1234'
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_TCP_PORT=${MSSQL_TCP_PORT}
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+      - MSSQL_PID=${MSSQL_PID}
+    volumes:
+      # Microsoft is lame -> run initialization script manually ('./init/mssql/setup.sql')
+      # Enhancement: microsoft/mssql-docker/pull/60
+      # - ./init/${MSSQL_CONTAINER_NAME}:/docker-entrypoint-initdb.d
+      - ./data/${MSSQL_CONTAINER_NAME}/data:/var/opt/mssql
 
-    # Databases:
-    # Oracle
-    # Microsoft SQL Server
-    # MySQL
-    # MariaDB
-    # Sybase
-    # PostgreSQL
+  oracle:
+    # https://github.com/oracle/docker-images/blob/master/OracleDatabase/SingleInstance/README.md
+    container_name: '${ORACLE_CONTAINER_NAME}'
+    image: 'oracle/database:${ORACLE_VERSION}'
+    ports:
+      - '${ORACLE_DB_PORT}:1521'
+      - '${ORACLE_WEB_PORT}:5500'
+    environment:
+      - ORACLE_SID=${ORACLE_SID}
+      - ORACLE_PDB=${ORACLE_PDB}
+      - ORACLE_PWD=${ORACLE_PWD}
+      - ORACLE_EDITION=${ORACLE_EDITION} 
+      - ORACLE_CHARACTERSET=${ORACLE_CHARACTERSET}
+      - ORACLE_PASSWORD=${ORACLE_PASSWORD}
+    volumes:
+      - ./data/${ORACLE_CONTAINER_NAME}:/opt/oracle/oradata
+      - ./init/${ORACLE_CONTAINER_NAME}/setup:/docker-entrypoint-initdb.d/setup
 
-    # Services:
-    # OpenStack
-    # Amazon Web Services (AWS)
-    # System Applications Product (SAP) 7.x
+
+# TODO:
+  # Databases:
+  # Sybase
+
+  # Services:
+  # OpenStack
+  # Amazon Web Services (AWS)
+  # System Applications Product (SAP) 7.x
+  # AAF?

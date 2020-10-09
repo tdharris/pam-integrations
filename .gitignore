@@ -2,3 +2,4 @@
 !.env*.example
 data/
 *.log
+src/
