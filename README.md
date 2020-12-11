@@ -4,11 +4,12 @@
 ### Pre-requisites
 - docker
 - docker-compose
-- `.env` file
+- `.env` file (see `.env.example`)
 
 ### Start & Initialize
 ```
 docker-compose up [-d]
+docker-compose up [-d] <containerName>
 ```
 
 ### Manage docker containers
@@ -26,10 +27,24 @@ Mapped to local volumes respective to each container. If applicable:
 - Configuration: `./data/{dbcontainer}/config`
 
 ## Initialization scripts
-Any executable `*.sql`, `*.sql.gz`, `*.sh` scripts contained in appropriate `./init/{dbtype}/` folders will be ran to do further initialization before starting the respective service.
+Any executable `*.sql`, `*.sql.gz`, `*.sh` scripts contained in appropriate `./init/{dbtype}/` folders will be ran to do further initialization before starting the respective service. This should be the case for most of the containers, exceptions listed below in Manual init section.
 
 ### Default init
 3 users are created and given all privileges to the appropriate initialized db (i.e. `example`): `dbuser{1-3}`. According to the default `Environment Variables`, the default admin user created is `dbadmin`.
+
+### Manual init
+Initialization of data should happen automatically with the db containers when created for the first time, except for the following containers which will need to be performed manually due to limitations of the provider's images.
+#### Oracle
+```
+docker exec -it oracle /bin/sh
+/opt/oracle/runUserScripts.sh /opt/oracle/scripts/setup/
+```
+#### MSSQL
+Pending `microsoft/mssql-docker/pull/60` (Allow for running initialization scripts). 
+```
+docker exec -it mssql /bin/sh
+/docker-entrypoint-initdb.d/setup.sql
+```
 
 ## Environment Variables
 Example environment variables can be seen below. A `.env` file should be created in the root directory setting the appropriate variables needed to initialize these containers.
@@ -54,6 +69,18 @@ LDAP_OPENLDAP_UID=0
 LDAP_OPENLDAP_GID=0
 
 # Oracle
+ORACLE_CONTAINER_NAME=oracle
+ORACLE_VERSION=12.2.0.1-se2
+ORACLE_DB_PORT=1521
+ORACLE_WEB_PORT=5500
+ORACLE_SID=ORCLCDB
+ORACLE_PDB=ORCLPDB1
+ORACLE_PWD=mypassword
+ORACLE_EDITION=standard
+ORACLE_CHARACTERSET=AL32UTF8
+ORACLE_DATABASE=example
+ORACLE_USER=dbadmin
+ORACLE_PASSWORD=mypassword
 
 # MySQL
 MYSQL_CONTAINER_NAME=mysql
@@ -82,4 +109,11 @@ POSTGRES_PORT=5432
 POSTGRES_DB=example
 POSTGRES_USER=dbadmin
 POSTGRES_PASSWORD=mypassword
+
+# Microsoft SQL Server
+MSSQL_CONTAINER_NAME=mssql
+MSSQL_VERSION=2017-latest
+MSSQL_TCP_PORT=1234
+MSSQL_SA_PASSWORD=mypassword
+MSSQL_PID=Express
 ```
