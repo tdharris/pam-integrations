@@ -1,6 +1,14 @@
 # Dockerized PAM Integrations
 
 ## How to use this
+### Docker Images
+- [OpenLDAP](https://hub.docker.com/r/osixia/openldap)
+- [MySQL](https://hub.docker.com/_/mysql)
+- [MariaDB](https://hub.docker.com/_/mariadb)
+- [Postgres](https://hub.docker.com/_/postgres)
+- [MSSQL](https://hub.docker.com/_/microsoft-mssql-server)
+- [Oracle](https://github.com/oracle/docker-images/blob/master/OracleDatabase/SingleInstance/README.md) (build image locally)
+
 ### Pre-requisites
 - docker
 - docker-compose
