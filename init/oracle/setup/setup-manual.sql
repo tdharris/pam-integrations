@@ -17,6 +17,9 @@ GRANT SYSDBA to dbadmin;
 CREATE USER dbuser1 identified by novell123 DEFAULT TABLESPACE example;
 CREATE USER dbuser2 identified by novell123 DEFAULT TABLESPACE example;
 CREATE USER dbuser3 identified by novell123 DEFAULT TABLESPACE example;
+CREATE USER dbuser4 identified by novell123 DEFAULT TABLESPACE example;
+CREATE USER dbuser5 identified by novell123 DEFAULT TABLESPACE example;
+CREATE USER dbuser6 identified by novell123 DEFAULT TABLESPACE example;
 
 -- Permissions for users
 GRANT CONNECT, RESOURCE,
@@ -25,12 +28,15 @@ GRANT CONNECT, RESOURCE,
     CREATE SEQUENCE,
     CREATE VIEW,
     CREATE PROCEDURE
-    to dbuser1, dbuser2, dbuser3;
+    to dbuser1, dbuser2, dbuser3, dbuser4, dbuser5, dbuser6;
 
 -- Possible need to give unlimited quota to default tablespace?
 ALTER USER dbadmin QUOTA UNLIMITED ON USERS;
 ALTER USER dbuser1 QUOTA UNLIMITED ON USERS;
 ALTER USER dbuser2 QUOTA UNLIMITED ON USERS;
 ALTER USER dbuser3 QUOTA UNLIMITED ON USERS;
+ALTER USER dbuser4 QUOTA UNLIMITED ON USERS;
+ALTER USER dbuser5 QUOTA UNLIMITED ON USERS;
+ALTER USER dbuser6 QUOTA UNLIMITED ON USERS;
 
 COMMIT;

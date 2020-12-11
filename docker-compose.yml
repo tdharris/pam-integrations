@@ -112,13 +112,3 @@ services:
       - ./data/${ORACLE_CONTAINER_NAME}:/opt/oracle/oradata
       - ./init/${ORACLE_CONTAINER_NAME}/setup:/docker-entrypoint-initdb.d/setup
 
-
-# TODO:
-  # Databases:
-  # Sybase
-
-  # Services:
-  # OpenStack
-  # Amazon Web Services (AWS)
-  # System Applications Product (SAP) 7.x
-  # AAF?
