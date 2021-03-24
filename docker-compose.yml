@@ -22,15 +22,21 @@ services:
       - LDAP_READONLY_USER_USERNAME=${LDAP_READONLY_USER_USERNAME}
       - LDAP_READONLY_USER_PASSWORD=${LDAP_READONLY_USER_PASSWORD}
     volumes:
-      - ./data/${LDAP_CONTAINER_NAME}/data:/var/lib/ldap
-      - ./data/${LDAP_CONTAINER_NAME}/config:/etc/ldap/slapd.d
-      - ./data/${LDAP_CONTAINER_NAME}/certificates:/container/service/slapd/assets/certs
+      - ${DATA_DIRECTORY}/${LDAP_CONTAINER_NAME}/data:/var/lib/ldap
+      - ${DATA_DIRECTORY}/${LDAP_CONTAINER_NAME}/config:/etc/ldap/slapd.d
+      - ${DATA_DIRECTORY}/${LDAP_CONTAINER_NAME}/certificates:/container/service/slapd/assets/certs
 
   mysql:
     # https://hub.docker.com/_/mysql
     container_name: '${MYSQL_CONTAINER_NAME}'
     image: mysql:${MYSQL_VERSION}
     user: '${RUN_UID}:${RUN_GID}'
+    command: [ "--character-set-server=utf8mb4",
+                "--collation-server=utf8mb4_unicode_ci",
+                "--require_secure_transport=ON",
+                "--ssl-ca=/etc/certs/root-ca.pem",
+                "--ssl-cert=/etc/certs/server-cert.pem",
+                "--ssl-key=/etc/certs/server-key.pem" ]
     ports:
       - '${MYSQL_PROTOCOL_MYSQL_PORT}:3306'
       - '${MYSQL_PROTOCOL_MYSQLX_PORT}:33060'
@@ -41,13 +47,20 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
       - ./init/mysql:/docker-entrypoint-initdb.d
-      - ./data/${MYSQL_CONTAINER_NAME}/data:/var/lib/mysql
+      - ${DATA_DIRECTORY}/${MYSQL_CONTAINER_NAME}/data:/var/lib/mysql
+      - ${DATA_DIRECTORY}/certs:/etc/certs
 
   mariadb:
     # https://hub.docker.com/_/mariadb
     container_name: '${MARIADB_CONTAINER_NAME}'
     image: mariadb:${MARIADB_VERSION}
     user: '${RUN_UID}:${RUN_GID}'
+    command: [ "--character-set-server=utf8mb4",
+                "--collation-server=utf8mb4_unicode_ci",
+                "--ssl",
+                "--ssl-ca=/etc/certs/root-ca.pem",
+                "--ssl-cert=/etc/certs/server-cert.pem",
+                "--ssl-key=/etc/certs/server-key.pem" ]
     ports:
       - '${MARIADB_PROTOCOL_MYSQL_PORT}:3306'
       - '${MARIADB_PROTOCOL_MYSQLX_PORT}:33060'
@@ -58,13 +71,18 @@ services:
       - MYSQL_PASSWORD=${MARIADB_PASSWORD}
     volumes:
       - ./init/mariadb:/docker-entrypoint-initdb.d
-      - ./data/${MARIADB_CONTAINER_NAME}/data:/var/lib/mysql
+      - ${DATA_DIRECTORY}/${MARIADB_CONTAINER_NAME}/data:/var/lib/mysql
+      - ${DATA_DIRECTORY}/certs:/etc/certs
 
   postgres:
     # https://hub.docker.com/_/postgres
     container_name: '${POSTGRES_CONTAINER_NAME}'
     image: postgres:${POSTGRES_VERSION}
     user: '${RUN_UID}:${RUN_GID}'
+    command: >
+      -c ssl=on 
+      -c ssl_cert_file=/etc/certs/postgresql/server.crt 
+      -c ssl_key_file=/etc/certs/postgresql/server.key
     ports:
       - '${POSTGRES_PORT}:5432'
     environment:
@@ -73,7 +91,8 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - ./init/postgres:/docker-entrypoint-initdb.d
-      - ./data/${POSTGRES_CONTAINER_NAME}/data:/var/lib/postgresql/data
+      - ${DATA_DIRECTORY}/${POSTGRES_CONTAINER_NAME}/data:/var/lib/postgresql/data
+      - ${DATA_DIRECTORY}/certs:/etc/certs
 
   mssql:
     # https://hub.docker.com/_/microsoft-mssql-server
@@ -92,7 +111,7 @@ services:
       # Microsoft is lame -> run initialization script manually ('./init/mssql/setup.sql')
       # Enhancement: microsoft/mssql-docker/pull/60
       # - ./init/${MSSQL_CONTAINER_NAME}:/docker-entrypoint-initdb.d
-      - ./data/${MSSQL_CONTAINER_NAME}/data:/var/opt/mssql
+      - ${DATA_DIRECTORY}/${MSSQL_CONTAINER_NAME}/data:/var/opt/mssql
 
   oracle:
     # https://github.com/oracle/docker-images/blob/master/OracleDatabase/SingleInstance/README.md
@@ -109,6 +128,6 @@ services:
       - ORACLE_CHARACTERSET=${ORACLE_CHARACTERSET}
       - ORACLE_PASSWORD=${ORACLE_PASSWORD}
     volumes:
-      - ./data/${ORACLE_CONTAINER_NAME}:/opt/oracle/oradata
+      - ${DATA_DIRECTORY}/${ORACLE_CONTAINER_NAME}:/opt/oracle/oradata
       - ./init/${ORACLE_CONTAINER_NAME}/setup:/docker-entrypoint-initdb.d/setup
 

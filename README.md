@@ -56,17 +56,11 @@ docker exec -it mssql /bin/sh
 
 ### SSL / TLS
 #### MySQL
-For more information, see [Section 4.4.5, “mysql_ssl_rsa_setup — Create SSL/RSA Files”](https://dev.mysql.com/doc/refman/5.7/en/mysql-ssl-rsa-setup.html). Only the MySQL enterprise edition server will create the certificates at --initialize time, so here are the manual steps.
-- Automatically create SSL certificate and key files:
+I have mapped over the locally generated certificates for consistency. Otherwise, self-signed certificates would be automatically created during initialization by `mysql_ssl_rsa_setup`. For more information, see vendor's documentation - [Section 4.4.5, “mysql_ssl_rsa_setup — Create SSL/RSA Files”](https://dev.mysql.com/doc/refman/5.7/en/mysql-ssl-rsa-setup.html).
+
+- Validate:
 ```
-docker exec -it mysql /bin/bash
-mysql_ssl_rsa_setup --uid=mysql
-exit
-```
-- Restart docker container & Validate SSL:
-```
-docker restart mysql
-docker exec -it mysql /bin/bash
+docker exec -it mysql /bin/sh
 mysql -uroot -p -h 127.0.0.1
 mysql> SHOW VARIABLES LIKE '%ssl%';
 +---------------+-----------------+
@@ -91,8 +85,44 @@ SSL:                    Cipher in use is DHE-RSA-AES256-SHA
 --------------
 ```
 
+- To manually create certificates with vendor's helper script:
+```
+docker exec -it mysql /bin/bash
+mysql_ssl_rsa_setup --uid=mysql
+exit
+docker restart mysql
+```
+
 #### MariaDB
 See [Securing Connections for Client and Server](https://mariadb.com/kb/en/securing-connections-for-client-and-server/).
+
+- Validate:
+```
+docker exec -it mariadb /bin/sh
+mysql -uroot -p -h 127.0.0.1 --ssl
+MariaDB [(none)]> SHOW VARIABLES LIKE '%ssl%';
++---------------------+----------------------------+
+| Variable_name       | Value                      |
++---------------------+----------------------------+
+| have_openssl        | YES                        |
+| have_ssl            | YES                        |
+| ssl_ca              | /etc/certs/root-ca.pem     |
+| ssl_capath          |                            |
+| ssl_cert            | /etc/certs/server-cert.pem |
+| ssl_cipher          |                            |
+| ssl_crl             |                            |
+| ssl_crlpath         |                            |
+| ssl_key             | /etc/certs/server-key.pem  |
+| version_ssl_library | OpenSSL 1.1.1  11 Sep 2018 |
++---------------------+----------------------------+
+10 rows in set (0.00 sec)
+MariaDB [(none)]> \s
+--------------
+...
+SSL:                    Cipher in use is TLS_AES_256_GCM_SHA384
+...
+--------------
+```
 
 ## Environment Variables
 Example environment variables can be seen below. A `.env` file should be created in the root directory setting the appropriate variables needed to initialize these containers.
