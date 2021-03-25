@@ -13,6 +13,7 @@
 - docker
 - docker-compose
 - `.env` file (see `.env.example`)
+- Manually created certificates: see [pre-requisite certificate steps](#pre-requisite-certificate-steps).
 
 ### Start & Initialize
 ```
@@ -47,16 +48,36 @@ Initialization of data should happen automatically with the db containers when c
 docker exec -it oracle /bin/sh
 /opt/oracle/runUserScripts.sh /opt/oracle/scripts/setup/
 ```
-#### MSSQL
-Pending `microsoft/mssql-docker/pull/60` (Allow for running initialization scripts). 
+
+## SSL / TLS
+### Pre-requisite certificate steps
+I have mapped over a locally generated certificate for consistency between containers.
+- Containers that use the manually created certificate: `MySQL, MariaDB, Postgres`.
+- Containers that automatically generate their own self-signed certificate: `MSSQL`
+- Currently unknown SSL default state: `Oracle`
+#### To generate the self-signed certificate with a provided utility script:
 ```
-docker exec -it mssql /bin/sh
-/docker-entrypoint-initdb.d/setup.sql
+./init/certs/generate-certs.sh
+```
+Note: Automatically creates certificates within default data directory: `.data/certs/` - this directory is mounted by dependent containers. If the `DATA_DIRECTORY` from `.env` is changed from the default `./.data/`, then please move the generated certs to the relevant `<data-path>/certs/`.
+
+Creates the following certificate files in `.data/certs/`:
+```
+root-ca-key.pem
+root-ca.pem
+server-cert.pem
+server-key.pem
+server-req.pem
+client-cert.pem
+client-key.pem
+client-req.pem
 ```
 
-### SSL / TLS
+### Databases
 #### MySQL
-I have mapped over the locally generated certificates for consistency. Otherwise, self-signed certificates would be automatically created during initialization by `mysql_ssl_rsa_setup`. For more information, see vendor's documentation - [Section 4.4.5, “mysql_ssl_rsa_setup — Create SSL/RSA Files”](https://dev.mysql.com/doc/refman/5.7/en/mysql-ssl-rsa-setup.html).
+Dependent on the manually created certificate (see [pre-requisite certificate steps](#pre-requisite-certificate-steps)).
+
+Otherwise, self-signed certificates would be automatically created during initialization by `mysql_ssl_rsa_setup`. For more information, see vendor's documentation - [Section 4.4.5, “mysql_ssl_rsa_setup — Create SSL/RSA Files”](https://dev.mysql.com/doc/refman/5.7/en/mysql-ssl-rsa-setup.html).
 
 - Validate:
 ```
@@ -93,10 +114,12 @@ exit
 docker restart mysql
 ```
 
-#### MariaDB
-See [Securing Connections for Client and Server](https://mariadb.com/kb/en/securing-connections-for-client-and-server/).
+### MariaDB
+Dependent on the manually created certificate (see [pre-requisite certificate steps](#pre-requisite-certificate-steps)).
 
-- Validate:
+For more information, see [Securing Connections for Client and Server](https://mariadb.com/kb/en/securing-connections-for-client-and-server/).
+
+Validate:
 ```
 docker exec -it mariadb /bin/sh
 mysql -uroot -p -h 127.0.0.1 --ssl
@@ -122,6 +145,23 @@ MariaDB [(none)]> \s
 SSL:                    Cipher in use is TLS_AES_256_GCM_SHA384
 ...
 --------------
+```
+
+### Postgres
+Dependent on the manually created certificate (see [pre-requisite certificate steps](#pre-requisite-certificate-steps)).
+
+Validate: See https://jdbc.postgresql.org/documentation/head/ssl-client.html.
+
+### MSSQL
+Self-signed cert is created automatically by the container.
+
+Validate (see `encrypt_option` column with value as `TRUE`):
+```
+docker exec -it mssql /bin/sh
+/opt/mssql-tools/bin/sqlcmd -S localhost,1234 -U dbadmin -P "Novell123" -d example -Q "select encrypt_option from sys.dm_exec_connections where session_id = @@spid;" -N -C
+encrypt_option
+----------------------------------------
+TRUE
 ```
 
 ## Environment Variables
