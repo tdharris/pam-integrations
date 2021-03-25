@@ -9,6 +9,9 @@ Take the following steps prior to initializing any containers:
 - Create a `.env` file (see `.env.example` for a sample)
 - Manually create certificates: see [pre-requisite certificate steps](#pre-requisite-certificate-steps).
 
+### Environment Variables
+Example environment variables can be found in `.env.example`. A `.env` file should be created in the root directory setting the appropriate variables needed to initialize these containers.
+
 ### Docker Images
 The following docker images are used as dependencies (FYI):
 - [OpenLDAP](https://hub.docker.com/r/osixia/openldap)
@@ -17,9 +20,6 @@ The following docker images are used as dependencies (FYI):
 - [Postgres](https://hub.docker.com/_/postgres)
 - [MSSQL](https://hub.docker.com/_/microsoft-mssql-server)
 - [Oracle](https://github.com/oracle/docker-images/blob/master/OracleDatabase/SingleInstance/README.md) (build image locally)
-
-### Environment Variables
-Example environment variables can be found in `.env.example`. A `.env` file should be created in the root directory setting the appropriate variables needed to initialize these containers.
 
 ## FYI
 ### Useful Docker Commands
