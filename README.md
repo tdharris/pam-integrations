@@ -1,7 +1,16 @@
 # Dockerized PAM Integrations
+Project of dockerized PAM integrations. Mostly DB containers that are initialized with `dbadmin`, `dbuser{1-3+}` for trying out Password Checkout / DB Monitoring features in PAM.
 
-## How to use this
+## Dependencies
+### Pre-requisites
+Take the following steps prior to initializing any containers:
+- Install [docker](https://docs.docker.com/get-docker/)
+- Install [docker-compose](https://docs.docker.com/compose/install/)
+- Create a `.env` file (see `.env.example` for a sample)
+- Manually create certificates: see [pre-requisite certificate steps](#pre-requisite-certificate-steps).
+
 ### Docker Images
+The following docker images are used as dependencies (FYI):
 - [OpenLDAP](https://hub.docker.com/r/osixia/openldap)
 - [MySQL](https://hub.docker.com/_/mysql)
 - [MariaDB](https://hub.docker.com/_/mariadb)
@@ -9,41 +18,41 @@
 - [MSSQL](https://hub.docker.com/_/microsoft-mssql-server)
 - [Oracle](https://github.com/oracle/docker-images/blob/master/OracleDatabase/SingleInstance/README.md) (build image locally)
 
-### Pre-requisites
-- docker
-- docker-compose
-- `.env` file (see `.env.example`)
-- Manually created certificates: see [pre-requisite certificate steps](#pre-requisite-certificate-steps).
+### Environment Variables
+Example environment variables can be found in `.env.example`. A `.env` file should be created in the root directory setting the appropriate variables needed to initialize these containers.
 
-### Start & Initialize
+## FYI
+### Useful Docker Commands
 ```
+# Start & Initialize
 docker-compose up [-d]
 docker-compose up [-d] <containerName>
-```
 
-### Manage docker containers
-```
+# Manage docker containers
 docker ps <container>
 docker start <container>
 docker stop <container>
 docker logs -f --tail 10 <container>
 docker exec -it <container> /bin/bash
+
+# Remove
+docker-compose rm <containerName>
 ```
 
 ### Storage
-Mapped to local volumes respective to each container. If applicable:
-- Data: `./data/{dbcontainer}/data`
-- Configuration: `./data/{dbcontainer}/config`
+Host directory is mapped to local volumes respective to each container. If applicable:
+- Data: `./.data/{dbcontainer}/data`
+- Configuration: `./.data/{dbcontainer}/config`
 
-## Initialization scripts
+### Automatic Initialization
 Any executable `*.sql`, `*.sql.gz`, `*.sh` scripts contained in appropriate `./init/{dbtype}/` folders will be ran to do further initialization before starting the respective service. This should be the case for most of the containers, exceptions listed below in Manual init section.
 
-### Default init
+#### Default init
 3 users are created and given all privileges to the appropriate initialized db (i.e. `example`): `dbuser{1-3}`. According to the default `Environment Variables`, the default admin user created is `dbadmin`.
 
-### Manual init
+#### Manual init
 Initialization of data should happen automatically with the db containers when created for the first time, except for the following containers which will need to be performed manually due to limitations of the provider's images.
-#### Oracle
+##### Oracle
 ```
 docker exec -it oracle /bin/sh
 /opt/oracle/runUserScripts.sh /opt/oracle/scripts/setup/
@@ -53,7 +62,7 @@ docker exec -it oracle /bin/sh
 ### Pre-requisite certificate steps
 I have mapped over a locally generated certificate for consistency between containers.
 - Containers that use the manually created certificate: `MySQL, MariaDB, Postgres`.
-- Containers that automatically generate their own self-signed certificate: `MSSQL`
+- Containers that automatically generate their own self-signed certificate: `MSSQL, OpenLDAP`
 - Currently unknown SSL default state: `Oracle`
 #### To generate the self-signed certificate with a provided utility script:
 ```
@@ -114,7 +123,7 @@ exit
 docker restart mysql
 ```
 
-### MariaDB
+#### MariaDB
 Dependent on the manually created certificate (see [pre-requisite certificate steps](#pre-requisite-certificate-steps)).
 
 For more information, see [Securing Connections for Client and Server](https://mariadb.com/kb/en/securing-connections-for-client-and-server/).
@@ -147,12 +156,12 @@ SSL:                    Cipher in use is TLS_AES_256_GCM_SHA384
 --------------
 ```
 
-### Postgres
+#### Postgres
 Dependent on the manually created certificate (see [pre-requisite certificate steps](#pre-requisite-certificate-steps)).
 
 Validate: See https://jdbc.postgresql.org/documentation/head/ssl-client.html.
 
-### MSSQL
+#### MSSQL
 Self-signed cert is created automatically by the container.
 
 Validate (see `encrypt_option` column with value as `TRUE`):
@@ -163,6 +172,3 @@ encrypt_option
 ----------------------------------------
 TRUE
 ```
-
-## Environment Variables
-Example environment variables can be found in `.env.example`. A `.env` file should be created in the root directory setting the appropriate variables needed to initialize these containers.
