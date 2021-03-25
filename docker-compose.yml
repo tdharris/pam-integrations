@@ -98,8 +98,8 @@ services:
     # https://hub.docker.com/_/microsoft-mssql-server
     container_name: '${MSSQL_CONTAINER_NAME}'
     image: 'mcr.microsoft.com/mssql/server:${MSSQL_VERSION}'
-    user: '${RUN_UID}:${RUN_GID}'
-    # init: /docker-entrypoint-initdb.d/setup.sh
+    user: root
+    command: "/bin/bash /docker-entrypoint-initdb.d/entrypoint.sh"
     ports:
       - '${MSSQL_TCP_PORT}:1234'
     environment:
@@ -108,10 +108,8 @@ services:
       - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
       - MSSQL_PID=${MSSQL_PID}
     volumes:
-      # Microsoft is lame -> run initialization script manually ('./init/mssql/setup.sql')
-      # Enhancement: microsoft/mssql-docker/pull/60
-      # - ./init/${MSSQL_CONTAINER_NAME}:/docker-entrypoint-initdb.d
-      - ${DATA_DIRECTORY}/${MSSQL_CONTAINER_NAME}/data:/var/opt/mssql
+      - ./init/${MSSQL_CONTAINER_NAME}:/docker-entrypoint-initdb.d
+      - ${DATA_DIRECTORY}/${MSSQL_CONTAINER_NAME}/data:/var/opt/mssql/data
 
   oracle:
     # https://github.com/oracle/docker-images/blob/master/OracleDatabase/SingleInstance/README.md
