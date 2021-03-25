@@ -81,8 +81,8 @@ services:
     user: '${RUN_UID}:${RUN_GID}'
     command: >
       -c ssl=on 
-      -c ssl_cert_file=/etc/certs/postgresql/server.crt 
-      -c ssl_key_file=/etc/certs/postgresql/server.key
+      -c ssl_cert_file=/etc/certs/server-cert.pem
+      -c ssl_key_file=/etc/certs/server-key.pem
     ports:
       - '${POSTGRES_PORT}:5432'
     environment:
@@ -130,4 +130,3 @@ services:
     volumes:
       - ${DATA_DIRECTORY}/${ORACLE_CONTAINER_NAME}:/opt/oracle/oradata
       - ./init/${ORACLE_CONTAINER_NAME}/setup:/docker-entrypoint-initdb.d/setup
-
