@@ -158,7 +158,7 @@ Self-signed cert is created automatically by the container.
 Validate (see `encrypt_option` column with value as `TRUE`):
 ```
 docker exec -it mssql /bin/sh
-/opt/mssql-tools/bin/sqlcmd -S localhost,1234 -U dbadmin -P "Novell123" -d example -Q "select encrypt_option from sys.dm_exec_connections where session_id = @@spid;" -N -C
+/opt/mssql-tools/bin/sqlcmd -S localhost,1234 -U dbadmin -P "<MSSQL_PASSWORD>" -d example -Q "select encrypt_option from sys.dm_exec_connections where session_id = @@spid;" -N -C
 encrypt_option
 ----------------------------------------
 TRUE
